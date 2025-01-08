@@ -13,28 +13,79 @@
 </style>
 
 <style>
-    .container {
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
       display: flex;
-      align-items: left;
-      justify-content: left
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background-color: #000;
+      color: #fff;
     }
+
+    .container {
+      max-width: 800px;
+      width: 90%;
+      text-align: center;
+    }
+    
     img {
       max-width: 500px;
       min-width: 500px
     }
-    .topimage {
-      flex-basis: 15%
+    .topimage img {
+      width: 50%;
+      height: auto;
+      display: block;
     }
     .text {
       font-size: 20px;
       padding-left: 5px;
+    }
+
+    .text p {
+      margin: 10px 0;
+    }
+
+    .text .name {
+      font-size: 32px;
+      font-weight: bold;
+    }
+
+    .text .title {
+      font-size: 20px;
+      color: #555;
+    }
+
+    .text .affiliation,
+    .text .email {
+      font-size: 16px;
+      color: #777;
+    }
+
+    @media (max-width: 600px) {
+      .text .name {
+        font-size: 24px;
+      }
+
+      .text .title {
+        font-size: 18px;
+      }
+
+      .text .affiliation,
+      .text .email {
+        font-size: 14px;
+      }
     }
   </style>
 
 <div class="container">
     <div class="topimage">
       <!-- <img src="akg-prof-head.jpg"> -->
+       <center>
       <img src="akg-space-head.png">
+    </center>
     </div>
     <div class="text">
       <p style="font-family:Candara;font-size:52px;text-indent: 15px;">Andrew Gillette</p>
@@ -44,6 +95,8 @@
       <p style="font-family:Candara;font-size:18px;text-indent: 15px;">gillette7 [at] llnl.gov</p>
     </div>
   </div>
+
+
 
 
 intro + news
@@ -57,7 +110,10 @@ intro + news
 
 &rarr; Visit <a href ="https://www.math.arizona.edu/~agillette/" target="_blank">my old webpage at U. Arizona</a> (static since 2021)
 
-&rarr; Upcoming conferences: check back later!
+&rarr; Upcoming conferences:
+
+&nbsp;&nbsp;&nbsp;<a href="https://www.siam.org/conferences-events/siam-conferences/cse25/" target="_blank">SIAM Conference on Computational Science and Engineering</a>, Fort Worth, TX, Mar 2025.
+
 
 employment etc.
 ==============================================================
@@ -98,8 +154,8 @@ publications
 <br>&rarr; link to my <a href="https://arxiv.org/a/gillette_a_1.html" target="_blank">articles on arXiv</a>
  id | year | authors | title | status
 ---- | ---- | ---- | ---- | ----
-36 | 2024 | T. Chang, A. Gillette, R. Maulik | Interpolation Models and Error Bounds for Verifiable Scientific Machine Learning | submitted
- | | | <font color=orange> &nbsp&nbsp&nbsp&nbsp Submitted <a href="bib-36.html">[bib]</a> <a href="https://arxiv.org/pdf/2404.03586.pdf" target="_blank">[pdf]</a> <a href="https://arxiv.org/abs/2404.03586" target="_blank">[arxiv]</a> <a href ="https://github.com/LLNL/interpML" target="_blank">[code] </font>
+36 | 2025 | T. Chang, A. Gillette, R. Maulik | Interpolation Models and Error Bounds for Verifiable Scientific Machine Learning | accepted, in press
+ | | | <font color=orange> &nbsp&nbsp&nbsp&nbsp Journal of Computational Physics <a href="bib-36.html">[bib]</a> <a href="https://arxiv.org/pdf/2404.03586.pdf" target="_blank">[pdf]</a> <a href="https://arxiv.org/abs/2404.03586" target="_blank">[arxiv]</a> <a href ="https://github.com/LLNL/interpML" target="_blank">[code] </font>
 35 | 2024 | J. L. Peterson, ..., A. Gillette, ... (*29 authors total*) | Toward Digital Design at the Exascale: An Overview of Project ICECap | journal article
  | | | <font color=orange> &nbsp&nbsp&nbsp&nbsp Physics of Plasmas <a href="bib-35.html">[bib]</a> <a href="https://tinyurl.com/icecap2024" target="_blank">[pdf]</a> <a href="https://doi.org/10.1063/5.0205054" target="_blank">[doi]</a> </font>
 34 | 2024 | J. Wang, N. Chiang, A. Gillette, J. L. Peterson | A multifidelity Bayesian optimization method for inertial confinement fusion design | journal article
