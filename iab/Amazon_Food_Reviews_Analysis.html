@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Amazon Food Reviews — Analysis</title>
+  <style>
+    :root { --ink:#edf5ff; --muted:#aac0db; --navy:#071426; --panel:#10243f; --blue:#54a9ff; --cyan:#54e0d3; --gold:#ffc95c; --red:#ff7180; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:#061120; color:var(--ink); font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; overflow:hidden; }
+    .deck { height:100vh; }
+    .slide { display:none; min-height:100vh; padding:64px 8vw 58px; position:relative; background:radial-gradient(circle at 85% 12%,#1d568a 0,transparent 29%),radial-gradient(circle at 12% 100%,#133758 0,transparent 34%),linear-gradient(135deg,#071426 0%,#0a1e37 55%,#0a1930 100%); }
+    .slide.active { display:flex; flex-direction:column; justify-content:center; }
+    .eyebrow { color:var(--cyan); font-size:.78rem; font-weight:750; letter-spacing:.14em; text-transform:uppercase; margin-bottom:14px; }
+    h1 { font-size:clamp(2.6rem,6vw,5.8rem); line-height:.96; max-width:900px; margin:0; letter-spacing:-.05em; }
+    h2 { font-size:clamp(2.05rem,4.2vw,4.1rem); line-height:1.02; letter-spacing:-.045em; margin:0 0 18px; max-width:1000px; }
+    .lead { color:var(--muted); max-width:820px; font-size:clamp(1rem,1.6vw,1.35rem); line-height:1.55; margin:23px 0 0; }
+    .source { color:#88a6c9; font-size:.82rem; position:absolute; bottom:24px; left:8vw; }
+    .slide-no { position:absolute; right:8vw; bottom:24px; color:#88a6c9; font-variant-numeric:tabular-nums; }
+    .accent { color:var(--cyan); }
+    .cards { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-top:34px; max-width:1120px; }
+    .card { padding:21px; border:1px solid rgba(166,214,255,.18); border-radius:16px; background:linear-gradient(145deg,rgba(26,61,100,.75),rgba(9,28,53,.72)); box-shadow:0 16px 35px rgba(0,0,0,.18); }
+    .metric { font-size:clamp(2rem,3.2vw,3.5rem); font-weight:760; letter-spacing:-.06em; color:white; }
+    .label { margin-top:6px; color:var(--muted); font-size:.9rem; line-height:1.3; }
+    .split { display:grid; grid-template-columns:1.05fr .95fr; gap:55px; align-items:center; }
+    .chart-wrap { margin-top:12px; padding:28px 28px 18px; border-radius:19px; background:rgba(9,29,53,.68); border:1px solid rgba(166,214,255,.16); }
+    .bar-chart { height:270px; display:flex; align-items:flex-end; gap:clamp(10px,2.7vw,38px); padding:20px 10px 0; border-bottom:1px solid #537495; }
+    .bar { width:74px; min-width:35px; display:flex; flex-direction:column; justify-content:flex-end; align-items:center; gap:9px; }
+    .bar .value { font-size:.92rem; color:#dbeaff; font-weight:700; }
+    .bar .column { width:100%; min-height:6px; border-radius:9px 9px 0 0; background:linear-gradient(180deg,#68b9ff,#367fd0); }
+    .bar:nth-child(1) .column,.bar:nth-child(2) .column { background:linear-gradient(180deg,#ff9c9d,#db5265); }
+    .bar:nth-child(3) .column { background:linear-gradient(180deg,#ffd77e,#dca533); }
+    .bar .name { color:var(--muted); font-size:.82rem; white-space:nowrap; }
+    .callout { border-left:4px solid var(--cyan); padding:16px 0 16px 20px; margin:28px 0 0; color:#d9e9fa; font-size:1.12rem; line-height:1.45; }
+    .callout strong { color:white; }
+    .theme-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:14px; margin-top:25px; max-width:1050px; }
+    .theme { display:grid; grid-template-columns:1fr auto; gap:16px; padding:18px 20px; border-radius:13px; background:rgba(20,55,91,.65); border:1px solid rgba(166,214,255,.12); }
+    .theme-name { font-weight:720; }
+    .theme-detail { color:var(--muted); font-size:.86rem; margin-top:5px; }
+    .theme-score { text-align:right; color:var(--gold); font-weight:750; font-size:1.15rem; }
+    .theme-score small { display:block; color:var(--muted); font-weight:500; font-size:.72rem; }
+    .two-cols { display:grid; grid-template-columns:1fr 1fr; gap:22px; margin-top:25px; max-width:1120px; }
+    .insight { padding:24px; border-radius:16px; background:rgba(15,45,77,.78); border:1px solid rgba(166,214,255,.15); }
+    .insight h3 { margin:0 0 10px; font-size:1.15rem; }
+    .insight p { margin:0; color:var(--muted); line-height:1.5; }
+    .big-number { color:var(--cyan); font-size:2.7rem; font-weight:750; letter-spacing:-.05em; margin-bottom:8px; }
+    .steps { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:28px; max-width:1100px; }
+    .step { padding:23px; background:linear-gradient(145deg,rgba(32,84,134,.83),rgba(13,39,72,.78)); border-radius:16px; border:1px solid rgba(166,214,255,.17); }
+    .step-num { color:var(--cyan); font-weight:750; letter-spacing:.08em; font-size:.8rem; }
+    .step h3 { font-size:1.25rem; margin:9px 0; }
+    .step p { color:var(--muted); line-height:1.45; margin:0; }
+    .nav { position:fixed; z-index:3; bottom:18px; right:4vw; display:flex; gap:7px; }
+    .nav button { color:white; background:rgba(16,48,82,.85); border:1px solid rgba(190,223,255,.3); border-radius:9px; width:38px; height:34px; font-size:1.1rem; cursor:pointer; }
+    .dots { position:fixed; z-index:3; bottom:29px; left:50%; transform:translateX(-50%); display:flex; gap:8px; }
+    .dots span { display:block; width:7px; height:7px; border-radius:50%; background:#587694; }
+    .dots .on { background:var(--cyan); transform:scale(1.22); }
+    @media (max-width:760px) { body { overflow:auto; } .slide { padding:48px 7vw 65px; min-height:100svh; } .split,.two-cols { grid-template-columns:1fr; gap:22px; } .cards { grid-template-columns:repeat(2,1fr); } .theme-grid,.steps { grid-template-columns:1fr; } .source { left:7vw; font-size:.7rem; } }
+  </style>
+</head>
+<body>
+  <main class="deck">
+    <section class="slide active">
+      <div class="eyebrow">Exploratory review analysis</div>
+      <h1>Amazon Food Reviews<br><span class="accent">What customers say</span></h1>
+      <p class="lead">A 25,110-review sample reveals overwhelmingly positive sentiment, with the most actionable dissatisfaction concentrated around expectation-setting, packaging, freshness, and value.</p>
+      <div class="cards">
+        <div class="card"><div class="metric">25,110</div><div class="label">reviews analyzed</div></div>
+        <div class="card"><div class="metric">2,601</div><div class="label">unique product IDs</div></div>
+        <div class="card"><div class="metric">16,222</div><div class="label">unique reviewers</div></div>
+        <div class="card"><div class="metric">4.18</div><div class="label">mean rating out of 5</div></div>
+      </div>
+      <div class="source">Source: AmazonFoodReviews(25k).csv</div><div class="slide-no">01 / 06</div>
+    </section>
+
+    <section class="slide">
+      <div class="split">
+        <div>
+          <div class="eyebrow">Ratings</div>
+          <h2>Customers are <span class="accent">decidedly positive</span>.</h2>
+          <p class="lead">Nearly four in five reviews award 4 or 5 stars. The distribution is heavily concentrated at 5 stars, so broad averages conceal the relatively small but important set of low-rated experiences.</p>
+          <div class="callout"><strong>77.9%</strong> of reviews are positive (4–5 stars). Only <strong>13.5%</strong> are negative (1–2 stars).</div>
+        </div>
+        <div class="chart-wrap">
+          <div class="bar-chart" aria-label="Rating distribution">
+            <div class="bar"><div class="value">8.1%</div><div class="column" style="height:13%"></div><div class="name">1 star</div></div>
+            <div class="bar"><div class="value">5.4%</div><div class="column" style="height:9%"></div><div class="name">2 stars</div></div>
+            <div class="bar"><div class="value">8.6%</div><div class="column" style="height:14%"></div><div class="name">3 stars</div></div>
+            <div class="bar"><div class="value">16.7%</div><div class="column" style="height:27%"></div><div class="name">4 stars</div></div>
+            <div class="bar"><div class="value">61.2%</div><div class="column" style="height:100%"></div><div class="name">5 stars</div></div>
+          </div>
+          <p class="label">Share of all 25,110 reviews</p>
+        </div>
+      </div>
+      <div class="source">Ratings range from 1 to 5 stars. Median rating: 5.</div><div class="slide-no">02 / 06</div>
+    </section>
+
+    <section class="slide">
+      <div class="eyebrow">What customers mention</div>
+      <h2>Expectation-setting is the <span class="accent">sharpest pain point</span>.</h2>
+      <p class="lead">Taste and flavor dominate discussion and are associated with high ratings. Mentions of misleading descriptions or unmet expectations are much less common—but much more negative.</p>
+      <div class="theme-grid">
+        <div class="theme"><div><div class="theme-name">Taste / flavor</div><div class="theme-detail">51.7% of reviews mention it</div></div><div class="theme-score">4.24<small>average rating</small></div></div>
+        <div class="theme"><div><div class="theme-name">Price / value</div><div class="theme-detail">20.1% of reviews mention it</div></div><div class="theme-score">4.11<small>average rating</small></div></div>
+        <div class="theme"><div><div class="theme-name">Delivery / packaging</div><div class="theme-detail">13.3% of reviews mention it</div></div><div class="theme-score">4.00<small>average rating</small></div></div>
+        <div class="theme"><div><div class="theme-name">Quality / freshness</div><div class="theme-detail">11.7% of reviews mention it</div></div><div class="theme-score">4.01<small>average rating</small></div></div>
+        <div class="theme"><div><div class="theme-name">Description / expectation</div><div class="theme-detail">4.7% of reviews mention it</div></div><div class="theme-score">3.38<small>average rating</small></div></div>
+      </div>
+      <div class="callout">Reviews mentioning product descriptions or expectations have a <strong>29.9% negative-rating rate</strong>, more than double the overall rate.</div>
+      <div class="source">Theme prevalence based on keyword matching in review summaries and text.</div><div class="slide-no">03 / 06</div>
+    </section>
+
+    <section class="slide">
+      <div class="eyebrow">Signals worth using</div>
+      <h2>Negative reviews are <span class="accent">more diagnostic</span>.</h2>
+      <div class="two-cols">
+        <div class="insight"><div class="big-number">100 words</div><h3>Typical 1-star review length</h3><p>1-star reviews average 100 words, compared with 78 for 5-star reviews. Complaints tend to explain the problem in more detail.</p></div>
+        <div class="insight"><div class="big-number">82.4%</div><h3>Overall helpful-vote rate</h3><p>44,419 of 53,918 helpfulness votes were positive. Low-rated reviews receive more votes per review, making them useful issue-discovery evidence.</p></div>
+        <div class="insight"><div class="big-number">68.9%</div><h3>One-time reviewers</h3><p>Most customers write a single review. Yet the 31.1% who return account for 55.5% of all reviews.</p></div>
+        <div class="insight"><div class="big-number">1 → 530</div><h3>Reviews per product</h3><p>Half of product IDs have one review, while the most-reviewed product has 530. Product-level rankings therefore need minimum-volume thresholds.</p></div>
+      </div>
+      <div class="source">Review length includes summary and review text after removing HTML tags.</div><div class="slide-no">04 / 06</div>
+    </section>
+
+    <section class="slide">
+      <div class="eyebrow">Data quality</div>
+      <h2>Use care when modeling at the <span class="accent">product level</span>.</h2>
+      <div class="two-cols">
+        <div class="insight"><div class="big-number">10,516</div><h3>Rows share review text</h3><p>These duplicated text rows appear under multiple ProductIds, likely reflecting related listings such as product variants, bundle sizes, or mirrored catalog entries.</p></div>
+        <div class="insight"><div class="big-number">4.18 → 4.16</div><h3>Rating result remains stable</h3><p>The overall mean rating changes only slightly after deduplicating by review text. Descriptive conclusions are robust, even though repeated text affects modeling independence.</p></div>
+      </div>
+      <div class="callout"><strong>Recommendation:</strong> for prediction or product comparison, deduplicate review text or use group-aware splits by text/product family. Do not let copies of the same review appear in both training and test sets.</div>
+      <div class="source">Only 3 duplicate-text groups have conflicting star ratings.</div><div class="slide-no">05 / 06</div>
+    </section>
+
+    <section class="slide">
+      <div class="eyebrow">Recommended next actions</div>
+      <h2>Focus improvement efforts where <span class="accent">expectations break</span>.</h2>
+      <div class="steps">
+        <div class="step"><div class="step-num">01</div><h3>Audit listings</h3><p>Review product photos, size/count statements, bundle definitions, and ingredient details—especially for highly reviewed or poorly rated products.</p></div>
+        <div class="step"><div class="step-num">02</div><h3>Mine complaints</h3><p>Use the detailed 1–2 star reviews to tag concrete failure modes: damaged packaging, freshness defects, price frustration, and unmet expectations.</p></div>
+        <div class="step"><div class="step-num">03</div><h3>Build a robust model</h3><p>Deduplicate text, use a volume threshold for product comparisons, and retain helpfulness votes as a measure of review usefulness.</p></div>
+      </div>
+      <p class="lead">The core story is positive product sentiment. The clearest opportunity is operational: make listings and fulfillment reliably match the customer’s expectation.</p>
+      <div class="source">Analysis based on AmazonFoodReviews(25k).csv</div><div class="slide-no">06 / 06</div>
+    </section>
+  </main>
+  <div class="dots" aria-hidden="true"><span class="on"></span><span></span><span></span><span></span><span></span><span></span></div>
+  <div class="nav"><button type="button" id="prev" aria-label="Previous slide">←</button><button type="button" id="next" aria-label="Next slide">→</button></div>
+  <script>
+    const slides=[...document.querySelectorAll('.slide')], dots=[...document.querySelectorAll('.dots span')]; let current=0;
+    function show(n){ current=(n+slides.length)%slides.length; slides.forEach((s,i)=>s.classList.toggle('active',i===current)); dots.forEach((d,i)=>d.classList.toggle('on',i===current)); }
+    document.getElementById('prev').onclick=()=>show(current-1); document.getElementById('next').onclick=()=>show(current+1);
+    document.addEventListener('keydown',e=>{ if(e.key==='ArrowRight'||e.key==='PageDown')show(current+1); if(e.key==='ArrowLeft'||e.key==='PageUp')show(current-1); });
+  </script>
+</body>
+</html>
